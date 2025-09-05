@@ -42,12 +42,12 @@ def login():
             message='Please configure DISCORD_CLIENT_ID in your environment variables.'
         )
     
-    # Build OAuth URL with proper encoding - match Discord app configuration
+    # Build OAuth URL with proper encoding - use valid Discord scopes
     params = {
         'client_id': Config.DISCORD_CLIENT_ID,
         'response_type': 'code',
         'redirect_uri': Config.DISCORD_REDIRECT_URI,
-        'scope': 'identify email guilds voice'
+        'scope': 'identify guilds'
     }
     
     oauth_url = DISCORD_OAUTH_URL + '?' + urlencode(params)
@@ -64,7 +64,7 @@ def debug():
         'client_id': Config.DISCORD_CLIENT_ID,
         'response_type': 'code',
         'redirect_uri': Config.DISCORD_REDIRECT_URI,
-        'scope': 'identify email guilds voice'
+        'scope': 'identify guilds'
     })
     
     return f"""
