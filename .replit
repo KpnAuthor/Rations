@@ -17,6 +17,10 @@ author = "agent"
 task = "workflow.run"
 args = "Rations Web Server"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Discord Bot"
+
 [[workflows.workflow]]
 name = "Rations Web Server"
 author = "agent"
@@ -28,6 +32,17 @@ waitForPort = 5000
 
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow]]
+name = "Discord Bot"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python run_bot.py"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [[ports]]
 localPort = 5000

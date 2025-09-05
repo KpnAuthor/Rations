@@ -12,12 +12,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import Config
 from src.database import db
 
-# Bot intents
+# Bot intents - Start with minimal intents
 intents = discord.Intents.default()
-intents.message_content = True
-intents.members = True
 intents.guilds = True
 intents.voice_states = True
+# Note: message_content and members require privileged intents to be enabled in Discord Developer Portal
 
 class RationsBot(commands.Bot):
     def __init__(self):
