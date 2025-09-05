@@ -21,10 +21,10 @@ app.config['SECRET_KEY'] = Config.SECRET_KEY
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
-# Discord OAuth URLs
+# Discord OAuth URLs - use standard discord.com endpoints
+DISCORD_OAUTH_URL = 'https://discord.com/oauth2/authorize'  # Use standard endpoint
+DISCORD_TOKEN_URL = 'https://discord.com/api/oauth2/token'
 DISCORD_API_BASE = 'https://discord.com/api/v10'
-DISCORD_OAUTH_URL = f'{DISCORD_API_BASE}/oauth2/authorize'
-DISCORD_TOKEN_URL = f'{DISCORD_API_BASE}/oauth2/token'
 
 @app.route('/')
 def index():
@@ -73,6 +73,13 @@ def debug():
     <body style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
     <h2>🔍 Discord OAuth Debug Info</h2>
     
+    <div style="background: #ffebee; padding: 15px; border-radius: 5px; margin: 15px 0;">
+        <h3>🚨 Alternative Solution - Manual OAuth Test</h3>
+        <p>If the redirect keeps failing, click this link to manually test the Discord OAuth:</p>
+        <a href="{oauth_url}" target="_blank" style="background: #5865f2; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0;">🔗 Open Discord OAuth Manually</a>
+        <p><small>This will open Discord OAuth in a new tab. If it works, copy the callback URL and paste it in the browser manually.</small></p>
+    </div>
+    
     <div style="background: #e8f4f8; padding: 15px; border-radius: 5px; margin: 15px 0;">
         <h3>📋 Copy this EXACT redirect URL to Discord Developer Portal:</h3>
         <code style="background: white; padding: 10px; display: block; font-size: 14px; word-break: break-all;">
@@ -81,6 +88,7 @@ def debug():
     </div>
     
     <div style="background: #f0f0f0; padding: 15px; border-radius: 5px; margin: 15px 0;">
+        <p><strong>OAuth Base URL:</strong> {DISCORD_OAUTH_URL}</p>
         <p><strong>Client ID:</strong> {Config.DISCORD_CLIENT_ID}</p>
         <p><strong>Complete OAuth URL:</strong></p>
         <div style="word-break: break-all; background: white; padding: 10px; font-size: 12px; border: 1px solid #ccc;">
@@ -89,14 +97,14 @@ def debug():
     </div>
     
     <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0;">
-        <h3>⚠️ Steps to Fix:</h3>
+        <h3>⚠️ Discord Portal Configuration:</h3>
         <ol>
             <li>Go to <a href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</a></li>
             <li>Select your "Rations" application</li>
             <li>Click "OAuth2" in the left sidebar</li>
             <li>In the "Redirects" section, add the exact URL above</li>
+            <li>Make sure scopes include: identify, email, guilds, voice</li>
             <li>Click "Save Changes"</li>
-            <li>Come back and <a href="/login">try login again</a></li>
         </ol>
     </div>
     
