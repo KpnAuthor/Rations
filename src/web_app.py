@@ -51,7 +51,31 @@ def login():
     }
     
     oauth_url = DISCORD_OAUTH_URL + '?' + urlencode(params)
+    
+    # Debug: Log the OAuth URL
+    print(f"Redirecting to OAuth URL: {oauth_url}")
+    
     return redirect(oauth_url)
+
+@app.route('/debug')
+def debug():
+    """Debug page to show OAuth configuration"""
+    return f"""
+    <h2>Discord OAuth Debug Info</h2>
+    <p><strong>Client ID:</strong> {Config.DISCORD_CLIENT_ID}</p>
+    <p><strong>Redirect URI:</strong> {Config.DISCORD_REDIRECT_URI}</p>
+    <p><strong>OAuth URL:</strong></p>
+    <div style="word-break: break-all; background: #f0f0f0; padding: 10px; margin: 10px 0;">
+    {DISCORD_OAUTH_URL + '?' + urlencode({
+        'client_id': Config.DISCORD_CLIENT_ID,
+        'redirect_uri': Config.DISCORD_REDIRECT_URI,
+        'response_type': 'code',
+        'scope': 'identify guilds'
+    })}
+    </div>
+    <p><a href="/login">Try Login Again</a></p>
+    <p><a href="/">Back to Home</a></p>
+    """
 
 @app.route('/callback')
 def oauth_callback():
