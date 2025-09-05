@@ -21,7 +21,7 @@ intents.voice_states = True
 class RationsBot(commands.Bot):
     def __init__(self):
         super().__init__(
-            command_prefix=Config.BOT_PREFIX,
+            command_prefix=None,  # No text commands, only slash commands
             intents=intents,
             help_command=None
         )
@@ -35,10 +35,17 @@ class RationsBot(commands.Bot):
         # Start background tasks
         self.analytics_update_task.start()
         
+        # Sync slash commands
+        try:
+            synced = await self.tree.sync()
+            print(f'📋 Synced {len(synced)} slash commands')
+        except Exception as e:
+            print(f'Failed to sync commands: {e}')
+        
         # Set bot activity
         await self.change_presence(activity=discord.Activity(
             type=discord.ActivityType.watching,
-            name=f"{len(self.guilds)} servers | {Config.BOT_PREFIX}help"
+            name=f"{len(self.guilds)} servers | /analytics"
         ))
     
     async def on_guild_join(self, guild):
@@ -55,7 +62,7 @@ class RationsBot(commands.Bot):
         """Update bot presence with current guild count"""
         await self.change_presence(activity=discord.Activity(
             type=discord.ActivityType.watching,
-            name=f"{len(self.guilds)} servers | {Config.BOT_PREFIX}help"
+            name=f"{len(self.guilds)} servers | /analytics"
         ))
     
     async def on_message(self, message):
@@ -150,21 +157,23 @@ class RationsBot(commands.Bot):
 # Bot instance
 bot = RationsBot()
 
-# Bot commands
-@bot.command(name='analytics', aliases=['stats'])
-async def analytics_command(ctx):
+# Slash commands
+@bot.tree.command(name='analytics', description='Display server analytics and statistics')
+async def analytics_slash(interaction: discord.Interaction):
     """Display server analytics"""
-    if not ctx.guild:
-        await ctx.send("❌ This command can only be used in servers!")
+    if not interaction.guild:
+        await interaction.response.send_message("❌ This command can only be used in servers!", ephemeral=True)
         return
     
     try:
+        # Defer response for longer processing
+        await interaction.response.defer()
         # Get analytics data
-        analytics = db.get_server_analytics(ctx.guild.id, days=7)
-        message_analytics = db.get_message_analytics(ctx.guild.id, days=7)
+        analytics = db.get_server_analytics(interaction.guild.id, days=7)
+        message_analytics = db.get_message_analytics(interaction.guild.id, days=7)
         
         if not analytics:
-            await ctx.send("📊 No analytics data available yet. Please wait for data to be collected.")
+            await interaction.followup.send("📊 No analytics data available yet. Please wait for data to be collected.")
             return
         
         # Get latest data
@@ -172,7 +181,7 @@ async def analytics_command(ctx):
         
         # Create embed
         embed = discord.Embed(
-            title=f"📊 Server Analytics - {ctx.guild.name}",
+            title=f"📊 Server Analytics - {interaction.guild.name}",
             description="Analytics for the last 7 days",
             color=discord.Color.blue()
         )
@@ -210,7 +219,7 @@ async def analytics_command(ctx):
         # Most active channel
         if message_analytics:
             top_channel = message_analytics[0]
-            channel = ctx.guild.get_channel(top_channel['channel_id'])
+            channel = interaction.guild.get_channel(top_channel['channel_id'])
             channel_name = channel.name if channel else "Unknown"
             embed.add_field(
                 name="🔥 Most Active Channel",
@@ -218,17 +227,17 @@ async def analytics_command(ctx):
                 inline=False
             )
         
-        embed.set_footer(text=f"Use {Config.BOT_PREFIX}help for more commands")
+        embed.set_footer(text="Use /help for more commands")
         embed.timestamp = datetime.now()
         
-        await ctx.send(embed=embed)
+        await interaction.followup.send(embed=embed)
         
     except Exception as e:
         print(f'Analytics command error: {e}')
-        await ctx.send("❌ An error occurred while fetching analytics data.")
+        await interaction.followup.send("❌ An error occurred while fetching analytics data.")
 
-@bot.command(name='help')
-async def help_command(ctx):
+@bot.tree.command(name='help', description='Show help information about the bot')
+async def help_slash(interaction: discord.Interaction):
     """Display help information"""
     embed = discord.Embed(
         title="🤖 Rations Bot - Help",
@@ -237,19 +246,19 @@ async def help_command(ctx):
     )
     
     embed.add_field(
-        name=f"{Config.BOT_PREFIX}analytics",
+        name="/analytics",
         value="View server analytics and statistics",
         inline=False
     )
     
     embed.add_field(
-        name=f"{Config.BOT_PREFIX}help",
+        name="/help",
         value="Show this help message",
         inline=False
     )
     
     embed.add_field(
-        name=f"{Config.BOT_PREFIX}invite",
+        name="/invite",
         value="Get the bot invite link",
         inline=False
     )
@@ -262,13 +271,13 @@ async def help_command(ctx):
     
     embed.set_footer(text="Made with ❤️ for the Discord community")
     
-    await ctx.send(embed=embed)
+    await interaction.response.send_message(embed=embed)
 
-@bot.command(name='invite')
-async def invite_command(ctx):
+@bot.tree.command(name='invite', description='Get the bot invite link')
+async def invite_slash(interaction: discord.Interaction):
     """Generate bot invite link"""
     if not Config.DISCORD_CLIENT_ID:
-        await ctx.send("❌ Bot client ID not configured.")
+        await interaction.response.send_message("❌ Bot client ID not configured.", ephemeral=True)
         return
     
     permissions = discord.Permissions(
@@ -292,7 +301,7 @@ async def invite_command(ctx):
         color=discord.Color.blurple()
     )
     
-    await ctx.send(embed=embed)
+    await interaction.response.send_message(embed=embed)
 
 async def main():
     """Main bot function"""
