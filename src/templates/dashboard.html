@@ -84,7 +84,8 @@
                         To get started, you need to invite the Rations bot to your Discord server.
                     </p>
                     <div class="mt-4">
-                        <a href="#" class="btn btn-primary" id="inviteBotBtn">
+                        <a href="https://discord.com/oauth2/authorize?client_id=1413529832104525824&permissions=0&integration_type=0&scope=bot" 
+                           target="_blank" class="btn btn-primary">
                             <i class="fab fa-discord me-2"></i>Invite Bot to Server
                         </a>
                     </div>
@@ -146,17 +147,6 @@
 {% block extra_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Generate bot invite link (you'll need to implement this based on your bot's client ID)
-    const inviteBtn = document.getElementById('inviteBotBtn');
-    if (inviteBtn) {
-        // This would need the actual bot client ID from your config
-        const clientId = 'YOUR_BOT_CLIENT_ID'; // Replace with actual client ID
-        const permissions = '8'; // Adjust permissions as needed
-        const inviteUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&permissions=${permissions}&scope=bot%20applications.commands`;
-        
-        inviteBtn.href = inviteUrl;
-        inviteBtn.target = '_blank';
-    }
     
     // Load summary statistics
     loadSummaryStats();
