@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - Rations{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-search fa-4x text-muted mb-4"></i>
+                    <h1 class="display-1 text-muted">404</h1>
+                    <h3>Page Not Found</h3>
+                    <p class="text-muted">
+                        The page you are looking for doesn't exist or has been moved.
+                    </p>
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary me-2">
+                            <i class="fas fa-home me-1"></i>Go Home
+                        </a>
+                        {% if session.user %}
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
