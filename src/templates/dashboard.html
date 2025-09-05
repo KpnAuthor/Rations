@@ -60,11 +60,27 @@
                     
                     <div class="d-flex justify-content-between align-items-center">
                         <small class="text-muted">Server ID: {{ guild.id }}</small>
+                        {% if guild.has_data %}
                         <a href="{{ url_for('analytics', guild_id=guild.id) }}" 
                            class="btn btn-primary btn-sm">
                             <i class="fas fa-chart-line me-1"></i>View Analytics
                         </a>
+                        {% else %}
+                        <button onclick="triggerDataCollection('{{ guild.id }}', '{{ guild.name }}')" 
+                                class="btn btn-success btn-sm" id="collect-btn-{{ guild.id }}">
+                            <i class="fas fa-play me-1"></i>Get Data
+                        </button>
+                        {% endif %}
                     </div>
+                    
+                    {% if not guild.has_data %}
+                    <div class="mt-2">
+                        <small class="text-warning">
+                            <i class="fas fa-info-circle me-1"></i>
+                            No analytics data yet. Click "Get Data" to start collecting.
+                        </small>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -190,6 +206,72 @@ async function loadSummaryStats() {
     } catch (error) {
         console.error('Error loading summary stats:', error);
     }
+}
+
+// Function to trigger data collection for a server
+function triggerDataCollection(guildId, guildName) {
+    const button = document.getElementById(`collect-btn-${guildId}`);
+    const originalText = button.innerHTML;
+    
+    // Show loading state
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Collecting...';
+    button.disabled = true;
+    
+    fetch(`/api/trigger-data-collection/${guildId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            button.innerHTML = '<i class="fas fa-check me-1"></i>Started!';
+            button.className = 'btn btn-success btn-sm';
+            
+            // Show info message
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-info alert-dismissible fade show mt-3';
+            alertDiv.innerHTML = `
+                <i class="fas fa-info-circle me-2"></i>
+                Data collection started for <strong>${guildName}</strong>. 
+                Please wait a few minutes and refresh the page to see analytics data.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Insert alert before the server cards
+            const serverSection = document.querySelector('.row').parentNode;
+            serverSection.insertBefore(alertDiv, document.querySelector('.row'));
+            
+            // Auto-reload page after 5 seconds
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
+            
+        } else {
+            // Show error
+            button.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>Error';
+            button.className = 'btn btn-danger btn-sm';
+            alert('Failed to trigger data collection: ' + (data.message || data.error));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        button.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>Error';
+        button.className = 'btn btn-danger btn-sm';
+        alert('An error occurred while triggering data collection.');
+    })
+    .finally(() => {
+        // Re-enable button after 3 seconds
+        setTimeout(() => {
+            button.disabled = false;
+            if (button.innerHTML.includes('Error')) {
+                button.innerHTML = originalText;
+                button.className = 'btn btn-success btn-sm';
+            }
+        }, 3000);
+    });
 }
 </script>
 {% endblock %}

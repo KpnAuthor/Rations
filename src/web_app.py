@@ -209,8 +209,26 @@ def dashboard():
     if not user:
         return redirect(url_for('login'))
     
-    guilds = session.get('guilds', [])
-    return render_template('dashboard.html', user=user, guilds=guilds)
+    # Get user's guilds from session
+    user_guilds = session.get('guilds', [])
+    
+    # Get guilds where bot is present by checking database for analytics data
+    bot_guilds = []
+    for guild in user_guilds:
+        guild_id = int(guild['id'])
+        # Check if we have any analytics data for this guild (indicates bot presence)
+        analytics_data = db.get_server_analytics(guild_id, days=1)
+        
+        guild_info = {
+            'id': guild['id'],
+            'name': guild['name'],
+            'icon': guild.get('icon'),
+            'has_data': len(analytics_data) > 0,
+            'permissions': guild.get('permissions', 0)
+        }
+        bot_guilds.append(guild_info)
+    
+    return render_template('dashboard.html', user=user, guilds=bot_guilds)
 
 @app.route('/analytics/<int:guild_id>')
 def analytics(guild_id):
@@ -274,6 +292,39 @@ def api_analytics(guild_id):
     except Exception as e:
         print(f'API analytics error: {e}')
         return jsonify({'error': 'Failed to fetch analytics data'}), 500
+
+@app.route('/api/trigger-data-collection/<int:guild_id>', methods=['POST'])
+def trigger_data_collection(guild_id):
+    """Trigger immediate data collection for a guild"""
+    user = session.get('user')
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    # Check guild access
+    guilds = session.get('guilds', [])
+    guild = next((g for g in guilds if g['id'] == str(guild_id)), None)
+    
+    if not guild:
+        return jsonify({'error': 'Access denied'}), 403
+    
+    try:
+        # Force data collection by creating initial analytics entry
+        db.log_server_analytics(
+            guild_id=guild_id,
+            member_count=0,  # Will be updated by bot
+            channel_count=0,  # Will be updated by bot  
+            message_count=0,
+            voice_minutes=0
+        )
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Data collection triggered. Please wait a few minutes for data to appear.'
+        })
+        
+    except Exception as e:
+        print(f'Data collection trigger error: {e}')
+        return jsonify({'error': 'Failed to trigger data collection'}), 500
 
 @app.errorhandler(404)
 def not_found(error):
