@@ -8,7 +8,7 @@ class Config:
     DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
     DISCORD_CLIENT_ID = os.getenv('DISCORD_CLIENT_ID')
     DISCORD_CLIENT_SECRET = os.getenv('DISCORD_CLIENT_SECRET')
-    DISCORD_REDIRECT_URI = os.getenv('DISCORD_REDIRECT_URI', f'https://{os.getenv("REPLIT_DEV_DOMAIN", "localhost:5000")}/callback')
+    DISCORD_REDIRECT_URI = os.getenv('DISCORD_REDIRECT_URI', f'https://{os.getenv("REPLIT_DEV_DOMAIN", "568446d7-7267-4ae6-b0dc-13f7d03d4c86-00-j2u9mujexcjz.picard.replit.dev")}/callback')
     
     # Flask Configuration
     SECRET_KEY = os.getenv('FLASK_SECRET_KEY', 'dev-secret-key-change-in-production')
