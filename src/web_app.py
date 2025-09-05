@@ -6,6 +6,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from urllib.parse import urlencode
 from flask_session import Session
 import requests
 from datetime import datetime, timedelta
@@ -41,7 +42,7 @@ def login():
             message='Please configure DISCORD_CLIENT_ID in your environment variables.'
         )
     
-    # Build OAuth URL
+    # Build OAuth URL with proper encoding
     params = {
         'client_id': Config.DISCORD_CLIENT_ID,
         'redirect_uri': Config.DISCORD_REDIRECT_URI,
@@ -49,7 +50,7 @@ def login():
         'scope': 'identify guilds'
     }
     
-    oauth_url = DISCORD_OAUTH_URL + '?' + '&'.join([f"{k}={v}" for k, v in params.items()])
+    oauth_url = DISCORD_OAUTH_URL + '?' + urlencode(params)
     return redirect(oauth_url)
 
 @app.route('/callback')
