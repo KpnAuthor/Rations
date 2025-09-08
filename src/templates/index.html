@@ -11,7 +11,7 @@
         <p class="lead mb-4">
             Comprehensive Discord server analytics with beautiful charts and real-time insights
         </p>
-        
+
         {% if not user %}
         <div class="d-flex gap-3 justify-content-center">
             <a href="{{ url_for('login') }}" class="btn btn-light btn-lg">
@@ -24,20 +24,20 @@
                 Add Bot to Server
             </a>
         </div>
-        {% else %}
-        <div class="d-flex gap-3 justify-content-center">
-            <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg">
-                <i class="fas fa-tachometer-alt me-2"></i>
-                Go to Dashboard
-            </a>
-            <a href="https://discord.com/oauth2/authorize?client_id=1413529832104525824&permissions=0&integration_type=0&scope=bot" 
-               target="_blank" class="btn btn-outline-light btn-lg">
-                <i class="fas fa-plus me-2"></i>
-                Add Bot to Server
-            </a>
-        </div>
-        {% endif %}
-    </div>
+{% else %}
+<div class="d-flex gap-3 justify-content-center">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg">
+        <i class="fas fa-tachometer-alt me-2"></i>
+        Go to Dashboard
+    </a>
+    <a href="https://discord.com/oauth2/authorize?client_id=1413529832104525824&permissions=0&integration_type=0&scope=bot" 
+       target="_blank" class="btn btn-outline-light btn-lg">
+        <i class="fas fa-plus me-2"></i>
+        Add Bot to Server
+    </a>
+</div>
+{% endif %}
+</div>
 </section>
 
 <!-- Features Section -->
